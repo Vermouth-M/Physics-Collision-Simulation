@@ -1,0 +1,2 @@
+This project is a real-time 2D physics simulation built with C++ and SFML (Simple and Fast Multimedia Library). It demonstrates fundamental concepts of collision detection, collision response, and basic physics integration. 
+The simulation provides an interactive environment where multiple objects (circles, rectangles, or polygons) move under applied forces, bounce off walls, and collide with each other according to physical rules.
