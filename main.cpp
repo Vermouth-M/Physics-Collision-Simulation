@@ -1,5 +1,13 @@
 #include <SFML/Graphics.hpp>
 
+void circle(int count){
+    for ( int i = 0; i < count; i++)
+    {
+        sf::CircleShape shape(100.f);
+    }
+    
+}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({200, 200}), "SFML works!");
