@@ -1,29 +1,22 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <vector>
 
-void circle(int count){
-    for ( int i = 0; i < count; i++)
-    {
-        sf::CircleShape shape(100.f);
+
+class Partikel {
+public:
+    sf::Vector2f position;
+    sf::Vector2f velocity;
+    float radius;
+    sf::Color color;
+    float mass;
+
+    Partikel(float x, float y, float r, sf::Color c) 
+        : position(x, y), radius(r), color(c) {
+        mass = r * r; 
     }
-    
-}
+};
 
-int main()
-{
-    sf::RenderWindow window(sf::VideoMode({200, 200}), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+int main() {
 
-    while (window.isOpen())
-    {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-        }
-
-        window.clear();
-        window.draw(shape);
-        window.display();
-    }
 }
