@@ -41,6 +41,8 @@ public:
 
 int main() {
     srand(time(0));
+    
+    vector<Partikel> listpartikel;
     sf::Color color[]{
         sf::Color::Red, sf::Color::Green, sf::Color::Blue,
         sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan
@@ -48,27 +50,39 @@ int main() {
 
     int LEBAR = 800;
     int TINGGI = 600;
-    sf::Color w = color[rand()%6];
     
     sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "FP_Physics_Simulation");
     window.setFramerateLimit(60);
 
-    Partikel bola(400, 300, 150, 200, 20, w);
+    // Spawn 50 bola SEKALI di awal
+    for(int i = 0; i < 50; i++) {
+        float x = 50 + rand() % (LEBAR - 100);
+        float y = 50 + rand() % (TINGGI - 100);
+        float vx = -100 + rand() % 200;  // -100 sampai 100
+        float vy = -100 + rand() % 200;  // -100 sampai 100
+        float r = 10;
+        sf::Color w = color[rand() % 6];
+        
+        listpartikel.push_back(Partikel(x, y, vx, vy, r, w));
+    }
 
     while(window.isOpen()) {
-        
         while(const auto event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
             }
         }
 
-        // Update bola
-        bola.updatekondisi(LEBAR, TINGGI);
+        // Update semua bola
+        for(int i = 0; i < listpartikel.size(); i++) {
+            listpartikel[i].updatekondisi(LEBAR, TINGGI);
+        }
 
-        // gambar
+        // Gambar semua bola
         window.clear(sf::Color::Black);
-        bola.draw(window);
+        for(int i = 0; i < listpartikel.size(); i++) {
+            listpartikel[i].draw(window);
+        }
         window.display();
     }
 
