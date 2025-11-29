@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <cmath>
 
 using namespace std;
 
@@ -37,6 +38,17 @@ public:
             velocity.y = -velocity.y;
         }
     }
+    bool cekcollision(Partikel& lain){
+        sf::Vector2f delta = position - lain.position;
+        //rumus trigonometri buat tentuin jarak detilnya ada dikertas
+        float jarak = sqrt(delta.x*delta.x+delta.y*delta.y);
+        return jarak < (radius + lain.radius);
+    }
+    void colission(Partikel& lain){
+        sf::Vector2f temp = velocity;
+        velocity = lain.velocity;
+        lain.velocity = temp;
+    }
 };
 
 int main() {
@@ -60,7 +72,7 @@ int main() {
         float y = 50 + rand() % (TINGGI - 100);
         float vx = -100 + rand() % 200;  // -100 sampai 100
         float vy = -100 + rand() % 200;  // -100 sampai 100
-        float r = 10;
+        float r = 10 + rand() % 20;
         sf::Color w = color[rand() % 6];
         
         listpartikel.push_back(Partikel(x, y, vx, vy, r, w));
@@ -76,6 +88,14 @@ int main() {
         // Update semua bola
         for(int i = 0; i < listpartikel.size(); i++) {
             listpartikel[i].updatekondisi(LEBAR, TINGGI);
+        }
+        //Cek tumbukan(brute force utk saat ini)
+        for(int i = 0; i < listpartikel.size(); i++) {
+            for(int j = i + 1; j < listpartikel.size(); j++) {
+                if(listpartikel[i].cekcollision(listpartikel[j])) {
+                    listpartikel[i].colission(listpartikel[j]);
+                }
+            }
         }
 
         // Gambar semua bola
