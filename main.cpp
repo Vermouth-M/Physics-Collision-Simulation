@@ -1,28 +1,71 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <ctime>
 
+using namespace std;
 
 class Partikel {
 public:
     sf::Vector2f position;
-    float speed;
+    sf::Vector2f velocity;
     float radius;
     sf::Color color;
     float mass;
 
-    Partikel(float x, float y, float r, sf::Color c, float vel) 
-        : position(x, y), radius(r), color(c), speed(vel) {
+    Partikel(float x, float y, float vx, float vy, float r, sf::Color c) 
+        : position(x, y), velocity(vx, vy), radius(r), color(c) {
         mass = r * r; 
     }
-    void draw(sf::RenderWindow& window){
-        sf::CircleShape lingkaran({radius});
-        lingkaran.setPosition({position.x-radius, position.y-radius});
 
+    void draw(sf::RenderWindow& window) {
+        sf::CircleShape lingkaran({radius});
+        lingkaran.setPosition({position.x - radius, position.y - radius});
+        lingkaran.setFillColor(color);
+        window.draw(lingkaran);
     }
 
+    void updatekondisi(float lebar, float tinggi) {
+        // Update posisi
+        position += velocity * 0.016f;
+
+        // Pantul
+        if (position.x < radius || position.x > lebar - radius) {
+            velocity.x = -velocity.x;
+        }
+        if (position.y < radius || position.y > tinggi - radius) {
+            velocity.y = -velocity.y;
+        }
+    }
 };
 
 int main() {
+    srand(time(0));
 
+    int LEBAR = 800;
+    int TINGGI = 600;
+    
+    sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "Bola Pantul");
+    window.setFramerateLimit(60);
+
+    Partikel bola(400, 300, 150, 200, 20, sf::Color::White);
+
+    while(window.isOpen()) {
+        
+        while(const auto event = window.pollEvent()) {
+            if(event->is<sf::Event::Closed>()) {
+                window.close();
+            }
+        }
+
+        // Update bola
+        bola.updatekondisi(LEBAR, TINGGI);
+
+        // gambar
+        window.clear(sf::Color::Black);
+        bola.draw(window);
+        window.display();
+    }
+
+    return 0;
 }
