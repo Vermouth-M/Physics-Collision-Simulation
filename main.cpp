@@ -41,14 +41,19 @@ public:
 
 int main() {
     srand(time(0));
+    sf::Color color[]{
+        sf::Color::Red, sf::Color::Green, sf::Color::Blue,
+        sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan
+    };
 
     int LEBAR = 800;
     int TINGGI = 600;
+    sf::Color w = color[rand()%6];
     
-    sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "Bola Pantul");
+    sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "FP_Physics_Simulation");
     window.setFramerateLimit(60);
 
-    Partikel bola(400, 300, 150, 200, 20, sf::Color::White);
+    Partikel bola(400, 300, 150, 200, 20, w);
 
     while(window.isOpen()) {
         
