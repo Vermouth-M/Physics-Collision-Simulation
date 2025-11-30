@@ -82,7 +82,7 @@ public:
     }
 };
 //class untuk quadtree(belom lanjut)(ref:https://github.com/msinkec/quadtree-collision-detection/blob/master/quadtree.js)
-class Quadtree {
+/*class Quadtree {
     public:
     float x,y,lebar,tinggi;
     int kap;
@@ -156,12 +156,16 @@ class Quadtree {
 
 
 };
+*/
 
 int main() {
     srand(time(0));
     
     vector<Partikel> listpartikel;
     sf::Clock clock;
+    sf::Font font;
+    font.openFromFile("C:\\Users\\Jordi\\Downloads\\arial\\ArialCE.ttf");
+    sf::Text text(font);
     sf::Color color[]{
         sf::Color::Red, sf::Color::Green, sf::Color::Blue,
         sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan
@@ -169,6 +173,7 @@ int main() {
 
     unsigned int LEBAR = 800;
     unsigned int TINGGI = 600;
+    int totalCollisions = 0;
     
     sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "FP_Physics_Simulation");
     window.setFramerateLimit(60);
@@ -202,13 +207,36 @@ int main() {
         listpartikel.push_back(Partikel(x, y, vx, vy, r, w));
     }
 
-    while(window.isOpen()) {
+     while(window.isOpen()) {
         float waktu = clock.restart().asSeconds();
-        while(const auto event = window.pollEvent()) {
+        text.setString("Algoritma = Brute Force");
+        // set the character size
+        text.setCharacterSize(24); // in pixels, not points!
+        // set the color
+        text.setFillColor(sf::Color::White);
+        text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
+       
+        while(const optional<sf::Event> event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
             }
+           
+            // Tambah partikel saat mouse diklik
+            if(const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if(mousePressed->button == sf::Mouse::Button::Left) {
+                    float x = mousePressed->position.x;
+                    float y = mousePressed->position.y;
+                    float vx = -100 + rand() % 200;  
+                    float vy = -100 + rand() % 200;
+                    float r = 10 + rand() % 20;
+                    sf::Color w = color[rand() % 6];
+                    listpartikel.push_back(Partikel(x, y, vx, vy, r, w));
+                }
+            }
         }
+
+
 
         // Update semua bola
         for(int i = 0; i < listpartikel.size(); i++) {
@@ -223,11 +251,21 @@ int main() {
             }
         }
 
+
         // Gambar semua bola
         window.clear(sf::Color::Black);
         for(int i = 0; i < listpartikel.size(); i++) {
             listpartikel[i].draw(window);
         }
+        text.setFont(font);
+        text.setCharacterSize(20);
+        text.setFillColor(sf::Color::White);
+        text.setPosition({10, 10});
+        
+        string info = "Jumlah Bola: " + to_string(listpartikel.size())+ 
+                      "\nAlgoritma: Brute force";
+        text.setString(info);
+        window.draw(text);
         window.display();
     }
 
