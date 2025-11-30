@@ -16,7 +16,7 @@ public:
 
     Partikel(float x, float y, float vx, float vy, float r, sf::Color c) 
         : position(x, y), velocity(vx, vy), radius(r), color(c) {
-        mass = r * r; 
+            mass = r * r; 
     }
 
     void draw(sf::RenderWindow& window) {
@@ -48,8 +48,22 @@ public:
         sf::Vector2f temp = velocity;
         velocity = lain.velocity;
         lain.velocity = temp;
+
+        sf::Vector2f delta = position - lain.position;
+        float jarak = sqrt(delta.x * delta.x + delta.y * delta.y);
+        if (jarak > 0) {
+            float overlap = (radius + lain.radius - jarak) / 2.0f;
+            sf::Vector2f arah = delta / jarak;
+            
+            position += arah * overlap;
+            lain.position -= arah * overlap;
+        }
     }
 };
+//class untuk quadtree
+class Quadtree {
+
+}
 
 int main() {
     srand(time(0));
@@ -60,18 +74,35 @@ int main() {
         sf::Color::Yellow, sf::Color::Magenta, sf::Color::Cyan
     };
 
-    int LEBAR = 800;
-    int TINGGI = 600;
+    unsigned int LEBAR = 800;
+    unsigned int TINGGI = 600;
     
     sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "FP_Physics_Simulation");
     window.setFramerateLimit(60);
 
-    // Spawn 50 bola SEKALI di awal
+    // Spawn 50 bola SEKALI di awal & brute force lokasi spawn agar tidak overlap
     for(int i = 0; i < 50; i++) {
+        bool ceklokasi = false;
+        while (!ceklokasi){
+            float x = 50 + rand() % (LEBAR - 100);
+            float y = 50 + rand() % (TINGGI - 100);
+            ceklokasi = true;
+            for (int j = 0;listpartikel.size()<j;j++){
+                float tempx = x-listpartikel[j].position.x;
+                float tempy = y-listpartikel[j].position.y;
+                float jarak = sqrt(tempx*tempx+tempy*tempy);
+                if (jarak < 30){
+                    ceklokasi = false;
+                    break;
+                }
+
+            }
+
+        }
         float x = 50 + rand() % (LEBAR - 100);
         float y = 50 + rand() % (TINGGI - 100);
-        float vx = -100 + rand() % 200;  // -100 sampai 100
-        float vy = -100 + rand() % 200;  // -100 sampai 100
+        float vx = -100 + rand() % 200;   
+        float vy = -100 + rand() % 200;  
         float r = 10 + rand() % 20;
         sf::Color w = color[rand() % 6];
         
