@@ -38,10 +38,10 @@ public:
 
         // Pantul border
         if (position.x < radius || position.x > lebar - radius) {
-            velocity.x = -velocity.x;
+            velocity.x = -velocity.x * 0.99f;
         }
         if (position.y < radius || position.y > tinggi - radius) {
-            velocity.y = -velocity.y;
+            velocity.y = -velocity.y * 0.99f;
         }
     }
     bool cekcollision(Partikel& lain){
@@ -62,9 +62,9 @@ public:
         //percepatan awal
         float arahv1 = velocity.x * arah.x + velocity.y * arah.y;
         float arahv2 = lain.velocity.x * arah.x + lain.velocity.y * arah.y;
-        //percepatan after tumbukan
-        float v1_1 = ((mass - lain.mass) * arahv1 + lain.mass * arahv2) / (mass + lain.mass);
-        float v2_1 = ((lain.mass - mass) * arahv2 + lain.mass * arahv1) / (mass + lain.mass);
+        //percepatan after tumbukan(kali 2 biar agak cepat)
+        float v1_1 = ((mass - lain.mass) * arahv1 + 2 * lain.mass * arahv2) / (mass + lain.mass);
+        float v2_1 = ((lain.mass - mass) * arahv2 + 2 * lain.mass * arahv1) / (mass + lain.mass);
         // perhitungan total (awal-setelah(agar tdk minus))
         float totalperhitungan_1 = v1_1 - arahv1;
         float totalperhitungan_2 = v2_1 - arahv2;
@@ -81,8 +81,79 @@ public:
         }
     }
 };
-//class untuk quadtree
+//class untuk quadtree(belom lanjut)(ref:https://github.com/msinkec/quadtree-collision-detection/blob/master/quadtree.js)
 class Quadtree {
+    public:
+    float x,y,lebar,tinggi;
+    int kap;
+    vector<int> partikel2;
+    bool terbagi;
+
+    vector<Quadtree> child; 
+
+    Quadtree(float px,float py,float lebarlayar,float tinggilayar,int kapasitas){
+        x = px;
+        y = py;
+        lebar = lebarlayar;
+        tinggi = tinggilayar;
+        kap = kapasitas;
+        terbagi = false;
+    }
+    //bagi jadi 2 bagian
+    void pembagian(){
+        float w_2 = lebar / 2;
+        float h_2 = tinggi / 2;
+        a = new Quadtree(x - w_2,y,w_2,h_2,kap);
+        b = new Quadtree(x,y,w_2,h_2,kap);
+        c = new Quadtree(x - h_2,y + h_2,w_2,h_2,kap);
+        d = new Quadtree(x,y+h_2,w_2,h_2,kap);
+
+        terbagi = true;
+
+    }
+    bool berisi(float px, float py) {
+        return (px >= x && px < x + lebar && py >= y && py < y + tinggi);
+    }
+    //cara insertnya gimana anjir
+    bool insert(float id, float dx, float dy){
+        if(!berisi(px,py)){
+            return false;
+        }
+        if (partikel2.size < kapasitas){
+            partikel2.push_back(id);
+            return true;
+        }
+        if (!terbagi){
+            pembagian();
+        }
+        for (int i = 0; i < child.size(); i++) {
+            if (child[i].insert(id, dx, dy)) {
+                return true;
+            }
+        }
+
+        return false;
+
+        if(berisi(px,py)){
+            return true;
+        }
+
+    }
+
+    void draw(sf::RenderWindow& window) {
+        sf::RectangleShape kotak({lebar, tinggi});
+        kotak.setPosition({x, y});
+        kotak.setFillColor(sf::Color::Transparent);
+        kotak.setOutlineColor(sf::Color(50, 50, 50));
+        kotak.setOutlineThickness(1);
+        window.draw(kotak);
+
+        if (terbagi) {
+            for (int i = 0; i < children.size(); i++) {
+                children[i].draw(window);
+            }
+        }
+
 
 };
 
@@ -103,13 +174,13 @@ int main() {
     window.setFramerateLimit(60);
 
     // Spawn 50 bola SEKALI di awal & brute force lokasi spawn agar tidak overlap
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < 100; i++) {
         bool ceklokasi = false;
         while (!ceklokasi){
             float x = 50 + rand() % (LEBAR - 100);
             float y = 50 + rand() % (TINGGI - 100);
             ceklokasi = true;
-            for (int j = 0;j < listpartikel.size()<j;j++){
+            for (int j = 0;j < listpartikel.size();j++){
                 float tempx = x-listpartikel[j].position.x;
                 float tempy = y-listpartikel[j].position.y;
                 float jarak = sqrt(tempx*tempx+tempy*tempy);
