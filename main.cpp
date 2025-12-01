@@ -48,13 +48,13 @@ public:
         {
             position.x = (position.x < radius) ? radius : lebar - radius;
             velocity.x = -velocity.x * 0.99f;
-            velocity.y += (-10 + rand() % 20); // Variasi random
+            velocity.y += (-10 + rand() % 20);
         }
         if (position.y < radius || position.y > tinggi - radius)
         {
             position.y = (position.y < radius) ? radius : tinggi - radius;
             velocity.y = -velocity.y * 0.99f;
-            velocity.x += (-10 + rand() % 20); // Variasi random
+            velocity.x += (-10 + rand() % 20);
         }
     }
     bool cekcollision(Partikel &lain)
@@ -85,6 +85,7 @@ public:
         float totalperhitungan_1 = v1_1 - arahv1;
         float totalperhitungan_2 = v2_1 - arahv2;
 
+        //velocity akan ditambah berdasarkan rumus tumbukannya
         velocity += arah * totalperhitungan_1;
         lain.velocity += arah * totalperhitungan_2;
 
@@ -122,11 +123,14 @@ public:
     // Bagi menjadi 4 kuadran
     void subdivide()
     {
+        // bagi menjadi 4 bagian
         float w2 = lebar / 2;
         float h2 = tinggi / 2;
-
+        //Hapus saat tidak diperlukan
         children.clear();
+        //Reserve
         children.reserve(4);
+        //Pembagian area
         children.push_back(Quadtree(x + w2, y, w2, h2, kapasitas));      // kanan atas
         children.push_back(Quadtree(x, y, w2, h2, kapasitas));           // kiri atas
         children.push_back(Quadtree(x + w2, y + h2, w2, h2, kapasitas)); // kanan bawah
@@ -145,22 +149,27 @@ public:
     // Insert partikel ke quadtree
     bool insert(int partikelIndex, const vector<Partikel> &allPartikel)
     {
+        //apakah diisi atau tidak? jika tidak jangan dimasukan
         if (!berisi(allPartikel[partikelIndex]))
         {
             return false;
         }
 
+        //Apakah jumlah dari partikel dalam sebuah daerah mencukupi kapasitas? jika ya maka
+        //akan insert ke node dari quadtree
         if (partikelIndices.size() < kapasitas)
         {
             partikelIndices.push_back(partikelIndex);
             return true;
         }
 
+        //kalau belum terbagi di bagi menjadi 4 bagian(Fungsi dari Function subdivide)
         if (!terbagi)
         {
             subdivide();
         }
 
+        //Insert ke semua child
         for (int i = 0; i < 4; i++)
         {
             if (children[i].insert(partikelIndex, allPartikel))
@@ -176,6 +185,7 @@ public:
     void query(float px, float py, float radius, vector<int> &hasil, const vector<Partikel> &allPartikel)
     {
         // Cek overlap dengan quadtree
+        // Hanya mencari pada masing masing child tidak menghitung pada child yang lain
         if (px + radius < x ||         // Posisi Kiri
             px - radius > x + lebar || // Posisi Kanan
             py + radius < y ||         // Posisi atas
@@ -190,6 +200,7 @@ public:
             hasil.push_back(idx); //
         }
 
+        //semua child kemudian akan dibagi berdasarkan identifikai berdasarkan query
         if (terbagi)
         {
             for (int i = 0; i < 4; i++)
@@ -209,6 +220,7 @@ public:
         kotak.setOutlineThickness(1);
         window.draw(kotak);
 
+        //jika terbagi maka gambar kotak(disini artinya ada 4 kotak sesuai dgn Qtree)
         if (terbagi)
         {
             for (int i = 0; i < 4; i++)
@@ -236,7 +248,7 @@ int main()
     unsigned int TINGGI = 600;
 
     sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "FP_Physics_Simulation");
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(144);
 
     // Spawn 100 bola SEKALI di awal & brute force lokasi spawn agar tidak overlap
     for (int i = 0; i < 100; i++)
