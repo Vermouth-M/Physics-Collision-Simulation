@@ -31,6 +31,8 @@ v'₁ = ((m₁ - m₂) × v₁ + 2 × m₂ × v₂) / (m₁ + m₂)
 
 v'₂ = ((m₂ - m₁) × v₂ + 2 × m₁ × v₁) / (m₁ + m₂)
 
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/86a14bd9-4dc5-48d3-8e14-52ca1974c302.png?raw=true)
+
 ## Cara Kerja
 ### BruteForce
 Menggunakan Nested Loop untuk mengecek semua kondisi dari partikel apakah collision atau tidak yang jika hasil = true maka nanti akan dijalankan fungsi colission
@@ -71,4 +73,5 @@ Untuk Quadtree menggunakan class sendiri karena lebih kompleks daripada Brutefor
 
 ## Known Bug
 - Bola dapat stuck di dinding dan jika terpantul/terkena bola lain secara terus menerus kemungkinan dapat hilang
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/Foto-Program-dengan-Bug.png?raw=true)
 - Quadtree masih belum bisa dikatakan optimal karena secara pencarian bola masih belum konsisten
