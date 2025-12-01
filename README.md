@@ -37,15 +37,26 @@ v'₂ = ((m₂ - m₁) × v₂ + 2 × m₁ × v₁) / (m₁ + m₂)
 ### BruteForce
 Menggunakan Nested Loop untuk mengecek semua kondisi dari partikel apakah collision atau tidak yang jika hasil = true maka nanti akan dijalankan fungsi colission
 
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/BruteForce1.png?raw=true)
+
 ### Quadtree
 Untuk Quadtree menggunakan class sendiri karena lebih kompleks daripada Bruteforce
 - Constructor Quadtree = Node persegi panjang dalam sebuah ruang 2D
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/Quadtree.png?raw=true)
 - Fungsi Subdivide = Quadtree dibagi lagi menjadi 4 anak dengan area deteksinya masing-masing
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/subdivide.png?raw=true)
 - Fungsi berisi = untuk mengecek apakah dalam sebuah Quadtree ada partikel
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/berisi.png?raw=true)
 - Fungsi Insert = Fungsi untuk memasukan data dari partikel kedalam Quadtree
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/insert.png?raw=true)
 - Fungsi Query = Mengecek semua partikel dalam area pencarian masing-masing
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/query.png?raw=true)
 
-
+### Hasil Output
+#### Brute Force
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/BRUTEFORCE.png?raw=true)
+#### Quadtree
+![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/Foto-Program-dengan-Bug.png?raw=true)
 
 ## Dependendcy
 - SFML 3.0.1
@@ -72,6 +83,4 @@ Untuk Quadtree menggunakan class sendiri karena lebih kompleks daripada Brutefor
 - [x] Fitur ganti metode dan UI status metode
 
 ## Known Bug
-- Bola dapat stuck di dinding dan jika terpantul/terkena bola lain secara terus menerus kemungkinan dapat hilang
-![alt text](https://github.com/Vermouth-M/Physics-Collision-Simulation/blob/hasil/src/Foto-Program-dengan-Bug.png?raw=true)
 - Quadtree masih belum bisa dikatakan optimal karena secara pencarian bola masih belum konsisten
