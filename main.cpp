@@ -83,7 +83,7 @@ public:
         }
     }
 };
-//class untuk quadtree(sudah diubah tanpa pointer, menggunakan vector dan index)
+//class untuk quadtree
 class Quadtree {
 public:
     float x, y, lebar, tinggi;
