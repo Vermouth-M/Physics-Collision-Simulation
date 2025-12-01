@@ -13,9 +13,10 @@ public:
     float radius;
     sf::Color color;
     float mass;
+    int id; // Untuk identifikasi unik
 
-    Partikel(float x, float y, float vx, float vy, float r, sf::Color c) 
-        : position(x, y), velocity(vx, vy), radius(r), color(c) {
+    Partikel(float x, float y, float vx, float vy, float r, sf::Color c, int particleId = 0) 
+        : position(x, y), velocity(vx, vy), radius(r), color(c), id(particleId) {
             mass = r * r; 
     }
 
@@ -37,6 +38,7 @@ public:
         }
 
         // Pantul border
+        // mungkin bisa diedit suapaya dia ga stuck ke border?????
         if (position.x < radius || position.x > lebar - radius) {
             velocity.x = -velocity.x * 0.99f;
         }
@@ -81,65 +83,93 @@ public:
         }
     }
 };
-//class untuk quadtree(belom lanjut)(ref:https://github.com/msinkec/quadtree-collision-detection/blob/master/quadtree.js)
-/*class Quadtree {
-    public:
-    float x,y,lebar,tinggi;
-    int kap;
-    vector<int> partikel2;
+//class untuk quadtree(sudah diubah tanpa pointer, menggunakan vector dan index)
+class Quadtree {
+public:
+    float x, y, lebar, tinggi;
+    int kapasitas;
+    vector<int> partikelIndices; // Menyimpan index partikel
     bool terbagi;
+    
+    vector<Quadtree> children; // Menyimpan child sebagai vector
 
-    vector<Quadtree> child; 
-
-    Quadtree(float px,float py,float lebarlayar,float tinggilayar,int kapasitas){
+    Quadtree(float px, float py, float w, float h, int kap = 4) {
         x = px;
         y = py;
-        lebar = lebarlayar;
-        tinggi = tinggilayar;
-        kap = kapasitas;
+        lebar = w;
+        tinggi = h;
+        kapasitas = kap;
         terbagi = false;
     }
-    //bagi jadi 2 bagian
-    void pembagian(){
-        float w_2 = lebar / 2;
-        float h_2 = tinggi / 2;
-        a = new Quadtree(x - w_2,y,w_2,h_2,kap);
-        b = new Quadtree(x,y,w_2,h_2,kap);
-        c = new Quadtree(x - h_2,y + h_2,w_2,h_2,kap);
-        d = new Quadtree(x,y+h_2,w_2,h_2,kap);
 
+    // Bagi menjadi 4 kuadran
+    void subdivide() {
+        float w2 = lebar / 2;
+        float h2 = tinggi / 2;
+        
+        children.clear();
+        children.reserve(4);
+        children.push_back(Quadtree(x + w2, y, w2, h2, kapasitas));      // kanan atas
+        children.push_back(Quadtree(x, y, w2, h2, kapasitas));           // kiri atas
+        children.push_back(Quadtree(x + w2, y + h2, w2, h2, kapasitas)); // kanan bawah
+        children.push_back(Quadtree(x, y + h2, w2, h2, kapasitas));      // kiri bawah
+        
         terbagi = true;
+    }
 
+    // Cek partikel dalam area ini
+    bool berisi(const Partikel& p) {
+        return (p.position.x >= x && p.position.x < x + lebar && 
+                p.position.y >= y && p.position.y < y + tinggi);
     }
-    bool berisi(float px, float py) {
-        return (px >= x && px < x + lebar && py >= y && py < y + tinggi);
-    }
-    //cara insertnya gimana anjir
-    bool insert(float id, float dx, float dy){
-        if(!berisi(px,py)){
+
+    // Insert partikel ke quadtree
+    bool insert(int partikelIndex, const vector<Partikel>& allPartikel) {
+        if (!berisi(allPartikel[partikelIndex])) {
             return false;
         }
-        if (partikel2.size < kapasitas){
-            partikel2.push_back(id);
+        
+        if (partikelIndices.size() < kapasitas) {
+            partikelIndices.push_back(partikelIndex);
             return true;
         }
-        if (!terbagi){
-            pembagian();
+
+        if (!terbagi) {
+            subdivide();
         }
-        for (int i = 0; i < child.size(); i++) {
-            if (child[i].insert(id, dx, dy)) {
+        
+        for (int i = 0; i < 4; i++) {
+            if (children[i].insert(partikelIndex, allPartikel)) {
                 return true;
             }
         }
 
         return false;
-
-        if(berisi(px,py)){
-            return true;
-        }
-
     }
 
+    // Cari partikel
+    void query(float px, float py, float radius, vector<int>& hasil, const vector<Partikel>& allPartikel) {
+        // Cek overlap dengan quadtree
+        if (px + radius < x || //Posisi Kiri
+            px - radius > x + lebar || //Posisi Kanan
+            py + radius < y || //Posisi atas
+            py - radius > y + tinggi) { //Posisi bawah
+            return;
+        }
+
+        // Tambahkan partikel di node ini
+        for (int idx : partikelIndices) {
+            hasil.push_back(idx); //
+        }
+
+        if (terbagi) {
+            for (int i = 0; i < 4; i++) {
+                children[i].query(px, py, radius, hasil, allPartikel);
+            }
+        }
+    }
+
+    // Gambar grid
     void draw(sf::RenderWindow& window) {
         sf::RectangleShape kotak({lebar, tinggi});
         kotak.setPosition({x, y});
@@ -149,14 +179,12 @@ public:
         window.draw(kotak);
 
         if (terbagi) {
-            for (int i = 0; i < children.size(); i++) {
+            for (int i = 0; i < 4; i++) {
                 children[i].draw(window);
             }
         }
-
-
+    }
 };
-*/
 
 int main() {
     srand(time(0));
@@ -164,7 +192,7 @@ int main() {
     vector<Partikel> listpartikel;
     sf::Clock clock;
     sf::Font font;
-    font.openFromFile("C:\\Users\\Jordi\\Downloads\\arial\\ArialCE.ttf");
+    font.openFromFile("Arial.ttf");
     sf::Text text(font);
     sf::Color color[]{
         sf::Color::Red, sf::Color::Green, sf::Color::Blue,
@@ -173,99 +201,141 @@ int main() {
 
     unsigned int LEBAR = 800;
     unsigned int TINGGI = 600;
-    int totalCollisions = 0;
     
     sf::RenderWindow window(sf::VideoMode({LEBAR, TINGGI}), "FP_Physics_Simulation");
     window.setFramerateLimit(60);
 
-    // Spawn 50 bola SEKALI di awal & brute force lokasi spawn agar tidak overlap
+
+
+    // Spawn 100 bola SEKALI di awal & brute force lokasi spawn agar tidak overlap
     for(int i = 0; i < 100; i++) {
-        bool ceklokasi = false;
-        while (!ceklokasi){
-            float x = 50 + rand() % (LEBAR - 100);
-            float y = 50 + rand() % (TINGGI - 100);
-            ceklokasi = true;
-            for (int j = 0;j < listpartikel.size();j++){
-                float tempx = x-listpartikel[j].position.x;
-                float tempy = y-listpartikel[j].position.y;
-                float jarak = sqrt(tempx*tempx+tempy*tempy);
-                if (jarak < 30){
-                    ceklokasi = false;
+        bool posisiValid = false;
+        float x, y;
+        
+        while (!posisiValid){
+            x = 50 + rand() % (LEBAR - 100);
+            y = 50 + rand() % (TINGGI - 100);
+            posisiValid = true;
+            
+            for (int j = 0; j < listpartikel.size(); j++){
+                float dx = x - listpartikel[j].position.x;
+                float dy = y - listpartikel[j].position.y;
+                float jarak = sqrt(dx*dx + dy*dy);
+                float jarakMin = 10 + listpartikel[j].radius + 5;
+                if (jarak < jarakMin){
+                    posisiValid = false;
                     break;
                 }
-
             }
-
         }
-        float x = 50 + rand() % (LEBAR - 100);
-        float y = 50 + rand() % (TINGGI - 100);
+        
         float vx = -100 + rand() % 200;   
         float vy = -100 + rand() % 200;  
-        float r = 10 + rand() % 20;
+        float r = 8;
         sf::Color w = color[rand() % 6];
         
-        listpartikel.push_back(Partikel(x, y, vx, vy, r, w));
+        listpartikel.push_back(Partikel(x, y, vx, vy, r, w, i));
     }
+    
+    bool useQuadTree = true;
+    int jumlahPengecekan = 0;
+    text.setCharacterSize(18);
+    text.setFillColor(sf::Color::White);
+    text.setPosition({10, 10});
 
-     while(window.isOpen()) {
+    while(window.isOpen()) {
         float waktu = clock.restart().asSeconds();
-        text.setString("Algoritma = Brute Force");
-        // set the character size
-        text.setCharacterSize(24); // in pixels, not points!
-        // set the color
-        text.setFillColor(sf::Color::White);
-        text.setStyle(sf::Text::Bold | sf::Text::Underlined);
-
-       
         while(const optional<sf::Event> event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
             }
            
-            // Tambah partikel saat mouse diklik
             if(const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if(mousePressed->button == sf::Mouse::Button::Left) {
-                    float x = mousePressed->position.x;
-                    float y = mousePressed->position.y;
+                    float x = static_cast<float>(mousePressed->position.x);
+                    float y = static_cast<float>(mousePressed->position.y);
                     float vx = -100 + rand() % 200;  
                     float vy = -100 + rand() % 200;
                     float r = 10 + rand() % 20;
                     sf::Color w = color[rand() % 6];
-                    listpartikel.push_back(Partikel(x, y, vx, vy, r, w));
+                    listpartikel.push_back(Partikel(x, y, vx, vy, r, w, listpartikel.size()));
+                }
+            }
+            
+            if(const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if(keyPressed->code == sf::Keyboard::Key::Space) {
+                    useQuadTree = !useQuadTree;
                 }
             }
         }
-
-
-
+        
         // Update semua bola
         for(int i = 0; i < listpartikel.size(); i++) {
             listpartikel[i].updatekondisi(LEBAR, TINGGI, waktu);
         }
-        //Cek tumbukan(brute force utk saat ini)
-        for(int i = 0; i < listpartikel.size(); i++) {
-            for(int j = i + 1; j < listpartikel.size(); j++) {
-                if(listpartikel[i].cekcollision(listpartikel[j])) {
-                    listpartikel[i].colission(listpartikel[j]);
+        
+        jumlahPengecekan = 0;
+
+        if (useQuadTree) {
+            //QUADTREE
+            Quadtree qt(0, 0, LEBAR, TINGGI, 4);
+            
+            // Insert semua partikel ke QuadTree
+            for(int i = 0; i < listpartikel.size(); i++) {
+                qt.insert(i, listpartikel);
+            }
+
+            // Cek collision dengan QuadTree
+            for(int i = 0; i < listpartikel.size(); i++) {
+                vector<int> kandidat;
+                //area pencarian
+                float searchRadius = listpartikel[i].radius * 3;
+                qt.query(listpartikel[i].position.x, listpartikel[i].position.y, 
+                         searchRadius, kandidat, listpartikel);
+                
+                for (int idx : kandidat) {
+                    if (idx != i) {
+                        jumlahPengecekan++;
+                        if (listpartikel[i].cekcollision(listpartikel[idx])) {
+                            listpartikel[i].colission(listpartikel[idx]);
+                        }
+                    }
                 }
             }
+
+            // Gambar
+            window.clear(sf::Color::Black);
+            qt.draw(window);
+            
+        } else {
+            //BRUTE FORCE 
+            for(int i = 0; i < listpartikel.size(); i++) {
+                for(int j = i + 1; j < listpartikel.size(); j++) {
+                    jumlahPengecekan++;
+                    if(listpartikel[i].cekcollision(listpartikel[j])) {
+                        listpartikel[i].colission(listpartikel[j]);
+                    }
+                }
+            }
+
+            window.clear(sf::Color::Black);
         }
 
-
-        // Gambar semua bola
-        window.clear(sf::Color::Black);
+        // Gambar semua partikel
         for(int i = 0; i < listpartikel.size(); i++) {
             listpartikel[i].draw(window);
         }
-        text.setFont(font);
-        text.setCharacterSize(20);
-        text.setFillColor(sf::Color::White);
-        text.setPosition({10, 10});
+
+        // Tampilkan info
+        string metode = useQuadTree ? "QuadTree" : "Brute Force";
+        string teks = "Metode: " + metode + "\n";
+        teks += "Partikel: " + to_string(listpartikel.size()) + "\n";
+        teks += "Pengecekan: " + to_string(jumlahPengecekan) + "\n";
+        teks += "\nSPACE: Ganti metode";
         
-        string info = "Jumlah Bola: " + to_string(listpartikel.size())+ 
-                      "\nAlgoritma: Brute force";
-        text.setString(info);
+        text.setString(teks);
         window.draw(text);
+
         window.display();
     }
 
