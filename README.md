@@ -5,11 +5,11 @@ Project ini merupakan Final Project dari Mata Kuliah Struktur Data dan Algoritma
 ## Table of Content
 - [Overview](#Overview)
 - [Dasar Teori](#Dasar-Teori)
-- [Cara kerja Code]()
-- [Dependendcy]()
-- [Cara Install]()
-- [Progress]()
-- [Bug]()
+- [Cara kerja Code](#Cara-Kerja)
+- [Dependendcy](#Dependendcy)
+- [Cara Install](#Cara-Install)
+- [Progress](#Progress)
+- [Bug](#Known-Bug)
 
 ## Overview
 Simulasi ini menampilkan partikel-partikel yang bergerak dan bertumbukan dalam sebuah ruang 2D. Program ini membandingkan dua metode deteksi collision:
@@ -30,6 +30,20 @@ dengan Rumus(dikali 2 pada m2 x v2 agar mempercepat collision)
 v'₁ = ((m₁ - m₂) × v₁ + 2 × m₂ × v₂) / (m₁ + m₂)
 
 v'₂ = ((m₂ - m₁) × v₂ + 2 × m₁ × v₁) / (m₁ + m₂)
+
+## Cara Kerja
+### BruteForce
+Menggunakan Nested Loop untuk mengecek semua kondisi dari partikel apakah collision atau tidak yang jika hasil = true maka nanti akan dijalankan fungsi colission
+
+### Quadtree
+Untuk Quadtree menggunakan class sendiri karena lebih kompleks daripada Bruteforce
+- Constructor Quadtree = Node persegi panjang dalam sebuah ruang 2D
+- Fungsi Subdivide = Quadtree dibagi lagi menjadi 4 anak dengan area deteksinya masing-masing
+- Fungsi berisi = untuk mengecek apakah dalam sebuah Quadtree ada partikel
+- Fungsi Insert = Fungsi untuk memasukan data dari partikel kedalam Quadtree
+- Fungsi Query = Mengecek semua partikel dalam area pencarian masing-masing
+
+
 
 ## Dependendcy
 - SFML 3.0.1
